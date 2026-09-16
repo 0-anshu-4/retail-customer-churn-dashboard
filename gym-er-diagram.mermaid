@@ -1,0 +1,135 @@
+erDiagram
+    Branch ||--o{ Staff : "employs"
+    Branch ||--o{ Trainer : "employs"
+    Branch ||--o{ Member : "home branch of"
+    Branch ||--o{ GymClass : "hosts"
+    Branch ||--o{ Equipment : "owns"
+    Branch ||--o{ Feedback : "receives"
+
+    Member ||--o{ Membership : "holds"
+    Member ||--o{ Attendance : "checks into"
+    Member ||--o{ TrainingSession : "attends"
+    Member ||--o{ Feedback : "submits"
+    Member ||--o{ ClassBooking : "books"
+
+    MembershipPlan ||--o{ Membership : "defines"
+    Membership ||--o{ Payment : "generates"
+
+    Trainer ||--o{ GymClass : "leads"
+    Trainer ||--o{ TrainingSession : "conducts"
+
+    GymClass ||--o{ ClassBooking : "receives bookings"
+
+    Equipment ||--o{ EquipmentMaintenance : "logs"
+
+    Branch {
+        int branch_id PK
+        string branch_name
+        string city
+        string contact_phone
+    }
+
+    Staff {
+        int staff_id PK
+        string name
+        string role
+        int branch_id FK
+        date hire_date
+    }
+
+    Trainer {
+        int trainer_id PK
+        string name
+        string specialization
+        int branch_id FK
+    }
+
+    Member {
+        int member_id PK
+        string name
+        date dob
+        string phone
+        string email
+        date join_date
+        int branch_id FK
+    }
+
+    MembershipPlan {
+        int plan_id PK
+        string plan_name
+        int duration_months
+        decimal price
+    }
+
+    Membership {
+        int membership_id PK
+        int member_id FK
+        int plan_id FK
+        date start_date
+        date end_date
+        string status
+    }
+
+    Payment {
+        int payment_id PK
+        int membership_id FK
+        decimal amount
+        date payment_date
+        string method
+    }
+
+    Attendance {
+        int attendance_id PK
+        int member_id FK
+        datetime check_in
+        datetime check_out
+    }
+
+    GymClass {
+        int class_id PK
+        string class_name
+        int trainer_id FK
+        int branch_id FK
+        datetime schedule_time
+        int capacity
+    }
+
+    ClassBooking {
+        int member_id PK,FK
+        int class_id PK,FK
+        date booking_date PK
+        boolean attended
+    }
+
+    Equipment {
+        int equipment_id PK
+        string name
+        int branch_id FK
+        date purchase_date
+        string status
+    }
+
+    EquipmentMaintenance {
+        int maintenance_id PK
+        int equipment_id FK
+        date reported_date
+        date resolved_date
+        string notes
+    }
+
+    TrainingSession {
+        int session_id PK
+        int trainer_id FK
+        int member_id FK
+        datetime session_date
+        string notes
+    }
+
+    Feedback {
+        int feedback_id PK
+        int member_id FK
+        int branch_id FK
+        int rating
+        string comments
+        date feedback_date
+    }

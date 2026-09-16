@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail Churn &amp; RFM Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#10131a;
+    --surface:#171b24;
+    --surface2:#1e2430;
+    --border:#2a3140;
+    --text:#eceef2;
+    --muted:#8c94a6;
+    --gold:#d9a653;
+    --green:#4fae86;
+    --red:#e2604f;
+    --blue:#5c8dee;
+    --amber:#e0a23a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    padding:40px 48px 80px;
+    min-height:100vh;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+
+  header{margin-bottom:40px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--gold);
+    letter-spacing:0.02em;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:34px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin-bottom:8px;
+  }
+  .subtitle{color:var(--muted); font-size:15px; max-width:620px; line-height:1.55;}
+
+  .kpi-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin:36px 0;
+  }
+  .kpi{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:22px 24px;
+  }
+  .kpi-label{font-size:13px; color:var(--muted); margin-bottom:10px;}
+  .kpi-value{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:32px;
+    font-weight:600;
+  }
+  .kpi-value.gold{color:var(--gold);}
+  .kpi-value.green{color:var(--green);}
+  .kpi-value.red{color:var(--red);}
+  .kpi-sub{font-size:12px; color:var(--muted); margin-top:6px;}
+
+  section{margin:44px 0;}
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:18px; flex-wrap:wrap; gap:8px;
+  }
+  h2{font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:600;}
+  .section-note{font-size:12.5px; color:var(--muted);}
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:26px 28px;
+  }
+
+  .seg-row{
+    display:grid;
+    grid-template-columns:110px 1fr 90px 90px 100px;
+    align-items:center;
+    gap:16px;
+    padding:14px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .seg-row:last-child{border-bottom:none;}
+  .seg-name{font-weight:600; font-size:14.5px;}
+  .seg-bar-track{
+    background:var(--surface2);
+    border-radius:5px;
+    height:12px;
+    overflow:hidden;
+  }
+  .seg-bar-fill{height:100%; border-radius:5px;}
+  .seg-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    text-align:right;
+    color:var(--muted);
+  }
+  .seg-num.strong{color:var(--text); font-weight:600;}
+
+  .legend-dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:8px;}
+
+  .filters{display:flex; gap:8px; flex-wrap:wrap;}
+  .filter-btn{
+    background:var(--surface2);
+    border:1px solid var(--border);
+    color:var(--muted);
+    font-family:'Inter',sans-serif;
+    font-size:12.5px;
+    padding:7px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:border-color .15s, color .15s;
+  }
+  .filter-btn:hover{color:var(--text);}
+  .filter-btn.active{
+    color:var(--bg);
+    background:var(--gold);
+    border-color:var(--gold);
+    font-weight:600;
+  }
+
+  table{width:100%; border-collapse:collapse; margin-top:20px;}
+  thead th{
+    text-align:left;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--muted);
+    font-weight:500;
+    padding:0 14px 12px;
+    border-bottom:1px solid var(--border);
+  }
+  thead th.num{text-align:right;}
+  tbody td{
+    padding:11px 14px;
+    font-size:13.5px;
+    border-bottom:1px solid var(--border);
+  }
+  tbody td.num{
+    text-align:right;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+  }
+  tbody tr:hover{background:var(--surface2);}
+  .badge{
+    display:inline-block;
+    font-size:11.5px;
+    font-weight:600;
+    padding:3px 10px;
+    border-radius:20px;
+  }
+  .status-active{color:var(--green);}
+  .status-churned{color:var(--red);}
+
+  footer{
+    margin-top:56px;
+    padding-top:22px;
+    border-top:1px solid var(--border);
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  @media (max-width:800px){
+    body{padding:28px 20px 60px;}
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .seg-row{grid-template-columns:90px 1fr 70px; row-gap:6px;}
+    .seg-row .seg-num:nth-child(4){display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">RETAIL SALES · CUSTOMER ANALYTICS</div>
+    <h1>Churn &amp; RFM Segmentation Dashboard</h1>
+    <p class="subtitle">600 customers, 4,409 transactions. Customers scored on Recency, Frequency, and Monetary value, then segmented to identify who's worth targeting before they're gone for good.</p>
+  </header>
+
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value gold" id="kpi-revenue">–</div>
+      <div class="kpi-sub">across all 600 customers</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Churn Rate</div>
+      <div class="kpi-value red">22.83%</div>
+      <div class="kpi-sub">&gt;90 days since last purchase</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Retention Rate</div>
+      <div class="kpi-value green">77.17%</div>
+      <div class="kpi-sub">active within 90 days</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">At-Risk Revenue</div>
+      <div class="kpi-value" style="color:var(--amber)">₹36.3L</div>
+      <div class="kpi-sub">160 customers, 45–90+ day gap</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <h2>Revenue by Segment</h2>
+      <div class="section-note">RFM score, quintile-ranked across all customers</div>
+    </div>
+    <div class="panel" id="segment-panel"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Customer Detail</h2>
+      <div class="section-note">80-customer sample, stratified across segments</div>
+    </div>
+    <div class="panel">
+      <div class="filters" id="filters"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Customer&nbsp;ID</th>
+            <th class="num">Recency&nbsp;(days)</th>
+            <th class="num">Frequency</th>
+            <th class="num">Monetary&nbsp;(₹)</th>
+            <th>Segment</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Built from a synthetic dataset generated to have realistic customer behavior spread (loyal / regular / occasional / one-time / lapsed archetypes) — not live company data. Churn defined as no purchase within 90 days, a threshold chosen from the recency distribution (median 39 days, 90th percentile ~241 days). Pipeline: SQL aggregation → Pandas RFM scoring → this dashboard.
+  </footer>
+
+</div>
+
+<script>
+const segments = [
+  {name:"Champions", n:145, revenue:13550087.70, pctCustomers:24.2, pctRevenue:58.7, avgRecency:14.3, color:"var(--gold)"},
+  {name:"Loyal",     n:109, revenue:4556486.37,  pctCustomers:18.2, pctRevenue:19.7, avgRecency:27.7, color:"var(--blue)"},
+  {name:"At Risk",   n:160, revenue:3630912.68,  pctCustomers:26.7, pctRevenue:15.7, avgRecency:90.1, color:"var(--amber)"},
+  {name:"Lost",      n:186, revenue:1355809.47,  pctCustomers:31.0, pctRevenue:5.9,  avgRecency:148.8, color:"var(--red)"}
+];
+
+const totalRevenue = segments.reduce((s,seg)=>s+seg.revenue,0);
+document.getElementById('kpi-revenue').textContent =
+  "₹" + (totalRevenue/100000).toFixed(1) + "L";
+
+const maxRevenue = Math.max(...segments.map(s=>s.revenue));
+const segPanel = document.getElementById('segment-panel');
+segments.forEach(seg=>{
+  const row = document.createElement('div');
+  row.className = 'seg-row';
+  row.innerHTML = `
+    <div class="seg-name"><span class="legend-dot" style="background:${seg.color}"></span>${seg.name}</div>
+    <div class="seg-bar-track"><div class="seg-bar-fill" style="width:${(seg.revenue/maxRevenue*100).toFixed(1)}%; background:${seg.color}"></div></div>
+    <div class="seg-num strong">${seg.n} cust.</div>
+    <div class="seg-num">${seg.pctRevenue}% rev.</div>
+    <div class="seg-num">${seg.avgRecency}d avg recency</div>
+  `;
+  segPanel.appendChild(row);
+});
+
+const customers = __CUSTOMER_DATA__;
+
+const segColors = {
+  "Champions":"var(--gold)", "Loyal":"var(--blue)",
+  "At Risk":"var(--amber)", "Lost":"var(--red)"
+};
+
+function renderTable(filter){
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  const rows = filter==='All' ? customers : customers.filter(c=>c.segment===filter);
+  rows.forEach(c=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>#${c.customer_id}</td>
+      <td class="num">${c.recency_days}</td>
+      <td class="num">${c.frequency}</td>
+      <td class="num">${c.monetary.toLocaleString('en-IN',{maximumFractionDigits:0})}</td>
+      <td><span class="badge" style="color:${segColors[c.segment]}">${c.segment}</span></td>
+      <td class="${c.status==='Active' ? 'status-active' : 'status-churned'}">${c.status}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+const filterNames = ['All','Champions','Loyal','At Risk','Lost'];
+const filterBar = document.getElementById('filters');
+filterNames.forEach((name,i)=>{
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn' + (i===0 ? ' active' : '');
+  btn.textContent = name;
+  btn.onclick = ()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTable(name);
+  };
+  filterBar.appendChild(btn);
+});
+
+renderTable('All');
+</script>
+</body>
+</html>
