@@ -50,7 +50,7 @@ retail data does. See `generate_data.py`.
 |---|---|
 | ![Dashboard overview](1.jpeg) | ![Revenue by segment](2.jpeg) |
 | ![Retention rate by segment](3.jpeg) | ![Churn rate by segment](4.jpeg) |
-| ![Full dashboard detail view](5.jpeg) | |
+| ![Full dashboard detail view](5.jpeg) | | ![Results](6.jpeg) 
 
 ## Repo contents
 
